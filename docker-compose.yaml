@@ -7,6 +7,7 @@ networks:
 services:
   loki:
     image: grafana/loki:latest
+    restart: always
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
@@ -14,6 +15,7 @@ services:
       - enhanced-git-network
 
   grafana:
+    restart: always
     environment:
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
       - GF_AUTH_ANONYMOUS_ENABLED=true
