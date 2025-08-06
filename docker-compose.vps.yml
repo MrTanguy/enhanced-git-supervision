@@ -8,6 +8,8 @@ services:
   loki:
     image: grafana/loki:latest
     restart: always
+    ports:
+      - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - monitoring
@@ -16,6 +18,8 @@ services:
     image: grafana/grafana:latest
     restart: always
     environment:
+      - GF_AUTH_DISABLE_SIGNOUT_MENU=true
+      - GF_USERS_ALLOW_SIGN_UP=false
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
       - GF_FEATURE_TOGGLES_ENABLE=alertingSimplifiedRouting,alertingQueryAndExpressionsStepMode
     entrypoint:
