@@ -26,39 +26,20 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
       - GF_FEATURE_TOGGLES_ENABLE=alertingSimplifiedRouting,alertingQueryAndExpressionsStepMode
-    entrypoint:
-      - sh
-      - -euc
-      - |
-        mkdir -p /etc/grafana/provisioning/datasources
-        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
-        apiVersion: 1
-        datasources:
-          - name: Loki
-            type: loki
-            access: proxy
-            orgId: 1
-            url: http://loki:3100
-            basicAuth: false
-            isDefault: true
-            version: 1
-            editable: false
-        EOF
-        /run.sh
+      - GF_SERVER_ROOT_URL=https://monitoring.enhanced-git.com/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=false
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.rule=Host(`monitoring.enhanced-git.com`)"
       - "traefik.http.routers.grafana.entrypoints=websecure"
       - "traefik.http.routers.grafana.tls=true"
       - "traefik.http.routers.grafana.tls.certresolver=cloudflare"
-      - "traefik.http.routers.grafana-secure.entrypoints=web"
       - "traefik.http.routers.grafana-secure.rule=Host(`monitoring.enhanced-git.com`)"
+      - "traefik.http.routers.grafana-secure.entrypoints=web"
       - "traefik.http.routers.grafana-secure.middlewares=redirect-to-https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.grafana-cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE,PATCH"
-      - "traefik.http.middlewares.grafana-cors.headers.accesscontrolalloworigin=*"
-      - "traefik.http.middlewares.grafana-cors.headers.accesscontrolallowheaders=*"
-      - "traefik.http.routers.grafana.middlewares=grafana-cors"
     networks:
       - monitoring
       - traefik
