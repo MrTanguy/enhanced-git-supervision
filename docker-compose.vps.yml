@@ -1,3 +1,17 @@
+networks:
+  traefik:
+    external: true
+  monitoring:
+    external: true
+
+services:
+  loki:
+    image: grafana/loki:latest
+    restart: always
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - monitoring
+
   grafana:
     image: grafana/grafana:latest
     restart: always
@@ -14,7 +28,7 @@
         datasources:
         - name: Loki
           type: loki
-          access: proxy 
+          access: proxy
           orgId: 1
           url: http://loki:3100
           basicAuth: false
@@ -23,23 +37,16 @@
           editable: false
         EOF
         /run.sh
+    networks:
+      - monitoring
+      - traefik
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.rule=Host(`monitoring.enhanced-git.com`)"
       - "traefik.http.routers.grafana.entrypoints=websecure"
       - "traefik.http.routers.grafana.tls=true"
       - "traefik.http.routers.grafana.tls.certresolver=cloudflare"
-
-      - "traefik.http.routers.grafana-http.entrypoints=web"
-      - "traefik.http.routers.grafana-http.rule=Host(`monitoring.enhanced-git.com`)"
-      - "traefik.http.routers.grafana-http.middlewares=redirect-to-https"
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-
-      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE,PATCH"
-      - "traefik.http.middlewares.cors.headers.accesscontrolalloworigin=*"
-      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
-      - "traefik.http.routers.grafana.middlewares=cors"
-
-    networks:
-      - traefik
-      - monitoring
+      - "traefik.http.middlewares.grafana-cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE,PATCH"
+      - "traefik.http.middlewares.grafana-cors.headers.accesscontrolalloworigin=*"
+      - "traefik.http.middlewares.grafana-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.routers.grafana.middlewares=grafana-cors"
