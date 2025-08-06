@@ -55,6 +55,10 @@ services:
       - "traefik.http.routers.grafana-secure.rule=Host(`monitoring.enhanced-git.com`)"
       - "traefik.http.routers.grafana-secure.middlewares=redirect-to-https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.grafana-cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE,PATCH"
+      - "traefik.http.middlewares.grafana-cors.headers.accesscontrolalloworigin=*"
+      - "traefik.http.middlewares.grafana-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.routers.grafana.middlewares=grafana-cors"
     networks:
       - monitoring
       - traefik
